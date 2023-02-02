@@ -340,7 +340,52 @@ function install_script() {
     advanced_settings
   fi
 }
+function update_script() {
+RELEASE=$(curl -s https://github.com/TandoorRecipes/recipes/releases/latesthttps://github.com/TandoorRecipes/recipes/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) }')
 
+UPD=$(whiptail --title "SUPPORT" --radiolist --cancel-button Exit-Script "Spacebar = Select" 11 58 2 \
+  "1" "Update Tandoor Recipes to $RELEASE" ON \
+  "2" "Tandoor Recipes Credentials" OFF \
+  3>&1 1>&2 2>&3)
+clear
+header_info
+if [ "$UPD" == "1" ]; then
+
+  msg_info "Stopping Tandoor Recipes"
+  systemctl stop gunicorn_recipes
+  sleep 1
+  msg_ok "Stopped Tandoor Recipes"
+
+  msg_info "Updating to ${RELEASE}"
+  cd /tmp
+  wget https://github.com/TandoorRecipes/recipes/releases/download/$RELEASE/recipes-$RELEASE.tar.xz &>/dev/null
+  tar -xf recipes-$RELEASE.tar.xz &>/dev/null &&
+  mv recipes /var/www &>/dev/null
+  cd /var/www/recipes
+
+  /var/www/recipes/bin/pip3 install -r requirements.txt --upgrade &>/dev/null
+
+  /usr/bin/python3 manage.py migrate &>/dev/null
+
+  msg_ok "Updated to ${RELEASE}"
+
+  msg_info "Cleaning up"
+  rm /tmp/recipes-$RELEASE.tar.xz
+  rm -rf /tmp/recipes
+  msg_ok "Cleaned"
+
+  msg_info "Starting Tandoor Recipes"
+  systemctl gunicorn-recipes
+  sleep 1
+  msg_ok "Started Tandoor Recipes"
+  msg_ok "Updated Successfully!\n"
+  exit
+fi
+if [ "$UPD" == "2" ]; then
+  cat tandoor.creds
+  exit
+fi
+}
 function update_script() {
 clear
 header_info
@@ -351,6 +396,28 @@ npm install --only=prod --omit=dev &>/dev/null
 msg_ok "Updated ${APP} LXC"
 msg_ok "Update Successfull"
 exit
+
+cd /var/www/recipes
+# Update source files
+git pull
+# load envirtonment variables
+export $(cat /var/www/recipes/.env |grep "^[^#]" | xargs)
+#install project requirements
+bin/pip3 install -r requirements.txt
+# migrate database 
+bin/python3 manage.py migrate
+# collect static files
+# if the output is not "0 static files copied" you might want to run the commands again to make sure everythig is collected
+bin/python3 manage.py collectstatic --no-input
+bin/python3 manage.py collectstatic_js_reverse
+# change to frontend directory
+cd vue
+# install and build frontend
+yarn install
+yarn build
+# restart gunicorn service
+sudo systemctl restart gunicorn_recipes
+
 }
 clear
 ARCH_CHECK
