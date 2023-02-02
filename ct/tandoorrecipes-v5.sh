@@ -359,8 +359,7 @@ if [ "$UPD" == "1" ]; then
   msg_info "Updating to ${RELEASE}"
   cd /tmp
   wget https://github.com/TandoorRecipes/recipes/releases/download/$RELEASE/recipes-$RELEASE.tar.xz &>/dev/null
-  tar -xf recipes-$RELEASE.tar.xz &>/dev/null &&
-  mv recipes /var/www &>/dev/null
+  tar -C /var/www -xf recipes-$RELEASE.tar.xz recipes &>/dev/null &&
   cd /var/www/recipes
 
   export $(cat /var/www/recipes/.env |grep "^[^#]" | xargs)

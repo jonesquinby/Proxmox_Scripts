@@ -110,8 +110,7 @@ msg_info "Downloading Tandoor Recipes"
 last_release=$(wget -q https://github.com/TandoorRecipes/recipes/releases/latest -O - | grep "title>Release" | cut -d " " -f 5)
 cd /tmp &&
 	wget https://github.com/TandoorRecipes/recipes/releases/download/$last_release/recipes-$last_release.tar.xz &>/dev/null &&
-	tar -xf recipes-$last_release.tar.xz -C /opt/ &>/dev/null &&
-	mv recipes /var/www &&
+	tar -C /var/www -xf recipes-$RELEASE.tar.xz recipes &>/dev/null
 	rm recipes-$last_release.tar.xz
 cd /var/www/recipes
 
