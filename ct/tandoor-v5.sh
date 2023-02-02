@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 function header_info {
   cat <<"EOF"
-    __  ___            _      __  ____                     
-   /  |/  /___ _____ _(_)____/  |/  (_)_____________  _____
-  / /|_/ / __  / __  / / ___/ /|_/ / / ___/ ___/ __ \/ ___/
- / /  / / /_/ / /_/ / / /__/ /  / / / /  / /  / /_/ / /    
-/_/  /_/\__,_/\__, /_/\___/_/  /_/_/_/  /_/   \____/_/     
-             /____/   v5                                   
+ ________                __                  ____            _
+/__  ___/____ ____  ____/ /___  ____  _____ / _  \___  ___  (_)___  ___  ____
+  / /  / __  / __ \/ __  / __ \/ __ \/ ___// /_/_/ _ \/ __\/ / __ \/ _ \/  __/
+ / /  / /_/ / / / / /_/ / /_/ / /_/ / /   / /\ </ ___/ /__/ / /_/ / ___(__  )
+/_/   \__,_/_/ /_/\__,_/\____/\____/_/   /_/ /_/\___/\___/_/ ____/\___/____/
+                v5                                        /_/
  
 EOF
 }
 clear
 header_info
 echo -e "Loading..."
-APP="MagicMirror"
+APP="TandoorRecipes"
 var_disk="3"
 var_cpu="1"
 var_ram="512"
@@ -387,7 +387,7 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/tteck/Proxmox/main/ct/c
 msg_info "Starting LXC Container"
 pct start $CTID
 msg_ok "Started LXC Container"
-lxc-attach -n $CTID -- bash -c "$(wget -qLO - https://raw.githubusercontent.com/tteck/Proxmox/main/install/$var_install.sh)" || exit
+lxc-attach -n $CTID -- bash -c "$(wget -qLO - https://raw.githubusercontent.com/jonesquinby/Proxmox_Scripts/dev_tandoor/install/$var_install.sh)" || exit
 IP=$(pct exec $CTID ip a s dev eth0 | sed -n '/inet / s/\// /p' | awk '{print $2}')
 pct set $CTID -description "# ${APP} LXC
 ### https://tteck.github.io/Proxmox/
